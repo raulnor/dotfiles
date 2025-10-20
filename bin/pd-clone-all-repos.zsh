@@ -198,7 +198,7 @@ pd-git-update "MS4DevOps" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penndo
 pd-git-update "MS4JAVA" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/MS4JAVA"
 
 # eConcrete - Dec 2023 
-pd-git-update "eConcrete" "main" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/eConcrete"
+pd-git-update "eConcrete" "devops" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/eConcrete"
 pd-git-update "eConcreteDevOps" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/eConcreteDevOps"
 pd-git-update "eConcreteJAVA" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/eConcreteJAVA"
 pd-git-update "eConcreteWEB" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/eConcreteWEB"

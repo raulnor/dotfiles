@@ -73,7 +73,6 @@ function bigfiles {
     fd -t f -E "*.png" -E "*.xcodeproj" | xargs wc -l | sort
 }
 
-alias ll='exa -l'
 alias log='git checkout $(pick-commit)'
 alias pcd='cd $(list-projects | fzf)'
 alias dictwords='cat /usr/share/dict/words | fzf'
@@ -81,5 +80,4 @@ alias wordle='cat ${HOME}/share/wordle | fzf'
 alias octordle='cat ${HOME}/share/octordle | fzf'
 alias skiping='ping skitheeast.asuscomm.com'
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
+[ -f ~/.macakase/__init__.zsh ] && source ~/.macakase/__init__.zsh
