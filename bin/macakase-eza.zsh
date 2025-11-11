@@ -1,19 +1,19 @@
 function ll() { 
-    eza -l --git
+    eza -l --git "$@"
 }
 
 function ls() { 
-    eza --grid
+    eza --grid "$@"
 }
 
 function lsa() { 
-    eza -a
+    eza -a "$@"
 }
 
 function lt() { 
-    eza -TL 2
+    eza -TL 2 "$@"
 }
 
 function lta() { 
-    eza -a -TL 2
+    eza -a -TL 2 "$@"
 }

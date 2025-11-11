@@ -3,9 +3,12 @@
 
 # WARNING: This is a work in progress!
 # It's based on DHH's Omakase, BUT:
-# - I don't agree / haven't tried everything in there
+# - I don't agree / haven't tried everything in there - items I haven't cleared are TODOs or [wrapped]
 # - I'm not (yet) leaving Mac
-# - These are only additive changes (no tiling WMs, using Omarchy keybinds to replace Mac keybinds)
+# - These are only additive changes 
+#   - no tiling WMs, 
+#   - no replacing Mac keybinds with Omarchy keybinds
+#   - explicitly disabled items marked with NOOP
 # zsh ~/Code/travis-mark/dotfiles/bin/macakase.sh
 
 # Grab directory of running script
@@ -31,19 +34,19 @@ fi
 # Create config directory
 mkdir -p ${HOME}/.macakase
 
-# Tiling WM
+# NOOP: Tiling WM
 
-# Hotkeys - https://learn.omacom.io/2/the-omarchy-manual/53/hotkeys
+# NOOP: Hotkeys - https://learn.omacom.io/2/the-omarchy-manual/53/hotkeys
 
-# Desktop background cycler
-# Color themed apps
-# File manager
+# TODO: Desktop background cycler
+# TODO: Color themed apps
+# TODO: File manager
 
-# Neovim
+# TODO: Neovim (defaults?)
 
-# Quick Emojis / Emojis
+# TODO: Quick Emojis / Emojis
 
-# Completions 
+# TODO: Completions 
 
 # Setup shell tools
 echo "Setup Shell Tools (fzf zoxide rg eza fd gron)"
@@ -55,33 +58,34 @@ cp ${SCRIPT_DIR}/macakase-init.zsh ~/.macakase/__init__.zsh
 source ~/.zshrc # TODO: Add init installer
 echo "Completed Shell Tools - \`open ~/.macakase to view configs\`"
 
-# Shell Functions - compress iso2sd format-disk img2jpg img2jpg-small img2png
+# TODO: Shell Functions - compress iso2sd format-disk img2jpg img2jpg-small img2png
 
-# TUIs - Lazygit lazydocker btop impala fastfetch
+# TODO: TUIs - Lazygit [lazydocker btop impala fastfetch]
 brew install lazygit
-# GUIs (O) - Obsidian Pinta LocalSend LibreOffice Signal mpv "OBS Studio" Kdenlive 
-# GUIs (C) - 1Password Typora Dropbox Tailscale Spotify
-# Dev Tools - Neovim Alacritty Mise Docker github-cli
-# PDFs - Document Viewer Xournal++
+# TODO: GUIs (O) - Obsidian Pinta LocalSend LibreOffice Signal mpv "OBS Studio" Kdenlive 
+# TODO: GUIs (C) - 1Password Typora Dropbox Tailscale Spotify
+# TODO: Dev Tools - Neovim Alacritty [Mise Docker] github-cli
+brew install nvim alacritty gh 
+# TODO: PDFs - Document Viewer Xournal++
 
-# Web App wrapping - WhatsApp Claude YouTube
+# TODO: Web App wrapping - WhatsApp Claude YouTube
 
-# Games - Steam RetroArch Minecraft (!) Doom
+# TODO: Games - Steam RetroArch Minecraft (!) Doom
 
-# Windows VM
+# TODO: Windows VM
 
-# Brew GUI
+# TODO: Brew GUI
 
-# Dotfiles / config changing / Defaults explorer
+# TODO: Dotfiles / config changing / Defaults explorer
 
-# Fonts
+# NOOP: Fonts
 
-# Multiple monitors
+# NOOP: Multiple monitors
 
-# Keyboard, mouse, trackpad
+# NOOP: Keyboard, mouse, trackpad
 
-# Bioauth
+# NOOP: Bioauth
 
-# Starship
+# TODO: Starship
 
-# Updates
+# TODO: Updates

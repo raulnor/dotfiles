@@ -73,6 +73,7 @@ function bigfiles {
     fd -t f -E "*.png" -E "*.xcodeproj" | xargs wc -l | sort
 }
 
+alias lg='lazygit'
 alias log='git checkout $(pick-commit)'
 alias pcd='cd $(list-projects | fzf)'
 alias dictwords='cat /usr/share/dict/words | fzf'
