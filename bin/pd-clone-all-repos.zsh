@@ -1,6 +1,10 @@
 #!/usr/bin/env zsh
 set -e
 
+# Clone all repos here
+BASE_DIR="${HOME}/Code/penndotvso"
+
+# Colors
 GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
 RESET="\033[0m"
@@ -15,20 +19,21 @@ function pd-git-update {
         echo "Error: Missing parameters. Usage: pd-git-update <directory> <branch> <repo_url>"
         return 1
     fi
-    
-    if [[ -d "$dir_name" ]]; then
+
+    local work_dir="${BASE_DIR}/${dir_name}"
+
+    if [[ -d "$work_dir" ]]; then
         echo "[pd-git-update] ${GREEN}PULL${RESET}: '$dir_name'"
-        cd "$dir_name"
-        git pull origin "$branch_name"
-        cd ..  # Return to parent directory
+        git -C "${work_dir}" pull origin "$branch_name"
     else
         echo "[pd-git-update] ${YELLOW}CLONE${RESET}: '$dir_name'"
-        git clone -b "$branch_name" "$repo_url" "$dir_name"
+        git clone -b "$branch_name" "$repo_url" "${work_dir}"
     fi
 }
 
 ## Startup
 ssh-add ${HOME}/.ssh/id_penndot_c_tralucke 
+mkdir -p "${BASE_DIR}"
 
 pd-git-update "99G" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/99G"
 
@@ -210,12 +215,12 @@ pd-git-update "EESafetyJAVA" "development" "penndotvso@vs-ssh.visualstudio.com:v
 pd-git-update "EESafetyWeb" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/EESafetyWeb"
 
 # (MSI) Mobile Safety Inspections – Aug 2025 
-pd-git-update "SafetyInspections" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/SafetyInspections"
+pd-git-update "SafetyInspections" "feature/unifiedBuild" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/SafetyInspections"
 pd-git-update "SafetyInspectionsJAVA" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/SafetyInspectionsJAVA"
 pd-git-update "SafetyInspectionsWeb" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/SafetyInspectionsWeb"
 
 # Construction AAR - Aug 2025
-pd-git-update "ConstructionAAR" "feature/v2.0" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/ConstructionAAR"
+pd-git-update "ConstructionAAR" "release/v2.1" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/ConstructionAAR"
 pd-git-update "ConstructionAARJava" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/ConstructionAARJava"
 pd-git-update "ConstructionAARWeb" "130972-AARProjectAspects" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/ConstructionAARWeb"
 
