@@ -74,8 +74,6 @@ function bigfiles {
 }
 
 alias lg='lazygit'
-alias log='git checkout $(pick-commit)'
-alias lr='gh repo list -L 99'
 alias pcd='cd $(list-projects | fzf)'
 alias dictwords='cat /usr/share/dict/words | fzf'
 alias wordle='cat ${HOME}/share/wordle | fzf'
