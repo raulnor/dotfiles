@@ -55,6 +55,39 @@ function pbsort {
     pbpaste | sort "$@" | pbcopy
 }
 
+services=(
+  "com.cloudflare.cloudflared"
+  "com.tl.sqlitebackup"
+  "com.travis.mindari.monitor"
+  "com.travis.mindari.server"
+  "homebrew.mxcl.seventeenlands"
+  "site.melvis.dnd.5001"
+  "site.melvis.green.mindari"
+  "site.melvis.green.msiysp.4001"
+)
+
+function svc() {
+  case "$1" in
+    ls)
+      printf "%-30s %8s %6s %6s\n" "SERVICE" "PID" "CPU" "MEM"
+      for s in "${services[@]}"; do
+        pid=$(launchctl list | grep "$s" | awk '{print $1}')
+        if [[ "$pid" =~ ^[0-9]+$ ]]; then
+          cpu=$(ps -p "$pid" -o %cpu= 2>/dev/null)
+          mem=$(ps -p "$pid" -o %mem= 2>/dev/null)
+          printf "%-30s %8s %6s %6s\n" "$s" "$pid" "$cpu" "$mem"
+        else
+          printf "%-30s %8s\n" "$s" "-"
+        fi
+      done
+      ;;
+    stop)   launchctl stop "$2" ;;
+    start)  launchctl start "$2" ;;
+    restart) launchctl stop "$2"; sleep 1; launchctl start "$2" ;;
+    *)      echo "usage: svc [ls|start|stop|restart] [service]" ;;
+  esac
+}
+
 # Run HTTP server then open browser
 function up {
     PORT=$(( $RANDOM % 48576 + 16384 ))
