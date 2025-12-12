@@ -10,14 +10,15 @@
 Convert D&D session markdown files to two-column PDFs.
 
 Usage:
-    python md2pdf.py input.md [output.pdf]
-    
+    python md2pdf.py input.md [output.pdf] [--left-margin INCHES]
+
 If output is not specified, it will use the input filename with .pdf extension.
 """
 
 import re
 import sys
 import os
+import argparse
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
@@ -324,10 +325,12 @@ def parse_markdown(content):
     return elements, title
 
 
-def build_story(elements, styles):
+def build_story(elements, styles, column_width=None):
     """Build the PDF story from parsed elements."""
+    if column_width is None:
+        column_width = COLUMN_WIDTH
     story = []
-    
+
     for elem_type, content in elements:
         if elem_type == 'zz_title':
             story.append(Paragraph(convert_inline_formatting(content), styles['DocTitle']))
@@ -363,7 +366,7 @@ def build_story(elements, styles):
             
             # Calculate column widths
             num_cols = max(len(row) for row in table_data) if table_data else 1
-            col_width = (COLUMN_WIDTH - 12) / num_cols
+            col_width = (column_width - 12) / num_cols
             
             table = Table(table_data, colWidths=[col_width] * num_cols)
             table.setStyle(TableStyle([
@@ -390,15 +393,15 @@ def build_story(elements, styles):
     return story
 
 
-def create_pdf(input_path, output_path):
+def create_pdf(input_path, output_path, left_margin=0.5):
     """Create the two-column PDF from markdown."""
     # Read markdown file
     with open(input_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    
+
     # Parse markdown
     elements, title = parse_markdown(content)
-    
+
     # If no title found in content, use filename
     if not any(e[0] == 'title' for e in elements):
         basename = os.path.basename(input_path)
@@ -406,22 +409,27 @@ def create_pdf(input_path, output_path):
         # Clean up filename for title
         title = name.replace('_', ' ').replace('-', ' - ')
         elements.insert(0, ('title', title))
-    
+
+    # Calculate margins
+    left_margin_size = left_margin * inch
+    right_margin_size = MARGIN
+    column_width = (PAGE_WIDTH - left_margin_size - right_margin_size - COLUMN_GAP) / 2
+
     # Create document
     doc = BaseDocTemplate(
         output_path,
         pagesize=letter,
-        leftMargin=MARGIN,
-        rightMargin=MARGIN,
+        leftMargin=left_margin_size,
+        rightMargin=right_margin_size,
         topMargin=MARGIN,
         bottomMargin=MARGIN,
     )
-    
+
     # Create two-column frame template
     frame_left = Frame(
+        left_margin_size,
         MARGIN,
-        MARGIN,
-        COLUMN_WIDTH,
+        column_width,
         PAGE_HEIGHT - 2 * MARGIN,
         id='left',
         leftPadding=0,
@@ -429,11 +437,11 @@ def create_pdf(input_path, output_path):
         topPadding=0,
         bottomPadding=0,
     )
-    
+
     frame_right = Frame(
-        MARGIN + COLUMN_WIDTH + COLUMN_GAP,
+        left_margin_size + column_width + COLUMN_GAP,
         MARGIN,
-        COLUMN_WIDTH,
+        column_width,
         PAGE_HEIGHT - 2 * MARGIN,
         id='right',
         leftPadding=6,
@@ -451,34 +459,39 @@ def create_pdf(input_path, output_path):
     
     # Create styles and build story
     styles = create_styles()
-    story = build_story(elements, styles)
-    
+    story = build_story(elements, styles, column_width)
+
     # Build PDF
     doc.build(story)
     print(f"Created: {output_path}")
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python md2pdf.py input.md [output.pdf]")
-        print("\nConverts markdown session notes to a two-column PDF.")
-        sys.exit(1)
-    
-    input_path = sys.argv[1]
-    
-    if len(sys.argv) >= 3:
-        output_path = sys.argv[2]
+    parser = argparse.ArgumentParser(
+        description='Convert markdown session notes to a two-column PDF.'
+    )
+    parser.add_argument('input', help='Input markdown file')
+    parser.add_argument('output', nargs='?', help='Output PDF file (default: input filename with .pdf extension)')
+    parser.add_argument('--left-margin', type=float, default=0.5,
+                        help='Left margin size in inches (default: 0.5, recommended: 1.0 for hole punch)')
+
+    args = parser.parse_args()
+
+    input_path = args.input
+
+    if args.output:
+        output_path = args.output
     else:
         # Generate output path from input
         basename = os.path.basename(input_path)
         name = os.path.splitext(basename)[0]
         output_path = name + '.pdf'
-    
+
     if not os.path.exists(input_path):
         print(f"Error: File not found: {input_path}")
         sys.exit(1)
-    
-    create_pdf(input_path, output_path)
+
+    create_pdf(input_path, output_path, args.left_margin)
 
 
 if __name__ == '__main__':
