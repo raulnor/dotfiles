@@ -331,43 +331,80 @@ def build_story(elements, styles, column_width=None):
         column_width = COLUMN_WIDTH
     story = []
 
-    for elem_type, content in elements:
+    i = 0
+    while i < len(elements):
+        elem_type, content = elements[i]
+
         if elem_type == 'zz_title':
             story.append(Paragraph(convert_inline_formatting(content), styles['DocTitle']))
             story.append(Spacer(1, 12))
-        
-        elif elem_type == 'h2':
-            story.append(Paragraph(convert_inline_formatting(content), styles['SectionHeader']))
-        
-        elif elem_type == 'h3':
-            story.append(Paragraph(convert_inline_formatting(content), styles['SubsectionHeader']))
-        
-        elif elem_type == 'h4':
-            story.append(Paragraph(convert_inline_formatting(content), styles['SubSubsectionHeader']))
-        
+            i += 1
+
+        elif elem_type in ['h2', 'h3', 'h4']:
+            # Keep heading with following content
+            heading_group = []
+
+            if elem_type == 'h2':
+                heading_group.append(Paragraph(convert_inline_formatting(content), styles['SectionHeader']))
+            elif elem_type == 'h3':
+                heading_group.append(Paragraph(convert_inline_formatting(content), styles['SubsectionHeader']))
+            elif elem_type == 'h4':
+                heading_group.append(Paragraph(convert_inline_formatting(content), styles['SubSubsectionHeader']))
+
+            # Add next few elements to keep together with heading
+            j = i + 1
+            items_to_keep = 0
+            while j < len(elements) and items_to_keep < 3:
+                next_type = elements[j][0]
+                # Stop at next heading
+                if next_type in ['h2', 'h3', 'h4', 'hr']:
+                    break
+                items_to_keep += 1
+                j += 1
+
+            # Add following content to group
+            for k in range(i + 1, min(i + 1 + items_to_keep, len(elements))):
+                next_elem_type, next_content = elements[k]
+
+                if next_elem_type == 'para':
+                    heading_group.append(Paragraph(convert_inline_formatting(next_content), styles['Body']))
+                elif next_elem_type == 'list':
+                    heading_group.append(Paragraph(convert_inline_formatting(next_content), styles['ListItem']))
+                elif next_elem_type == 'quote':
+                    formatted = convert_inline_formatting(next_content)
+                    formatted = formatted.replace('\n\n', '<br/><br/>')
+                    formatted = formatted.replace('\n', '<br/>')
+                    heading_group.append(Paragraph(formatted, styles['BlockQuote']))
+
+            story.append(KeepTogether(heading_group))
+            i += items_to_keep + 1
+
         elif elem_type == 'para':
             story.append(Paragraph(convert_inline_formatting(content), styles['Body']))
-        
+            i += 1
+
         elif elem_type == 'quote':
-            # Replace newlines with <br/> for reportlab
+            # Keep blockquotes together
             formatted = convert_inline_formatting(content)
             formatted = formatted.replace('\n\n', '<br/><br/>')
             formatted = formatted.replace('\n', '<br/>')
-            story.append(Paragraph(formatted, styles['BlockQuote']))
-        
+            story.append(KeepTogether([Paragraph(formatted, styles['BlockQuote'])]))
+            i += 1
+
         elif elem_type == 'list':
             story.append(Paragraph(convert_inline_formatting(content), styles['ListItem']))
-        
+            i += 1
+
         elif elem_type == 'table':
-            # Convert table data
+            # Keep tables together
             table_data = []
             for row in content:
                 table_data.append([convert_inline_formatting(cell) for cell in row])
-            
+
             # Calculate column widths
             num_cols = max(len(row) for row in table_data) if table_data else 1
             col_width = (column_width - 12) / num_cols
-            
+
             table = Table(table_data, colWidths=[col_width] * num_cols)
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8b0000')),
@@ -379,17 +416,21 @@ def build_story(elements, styles, column_width=None):
                 ('TOPPADDING', (0, 0), (-1, 0), 6),
                 ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9f9f9')),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), 
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1),
                  [colors.HexColor('#ffffff'), colors.HexColor('#f5f5f5')]),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ]))
-            story.append(table)
-            story.append(Spacer(1, 8))
-        
+            story.append(KeepTogether([table, Spacer(1, 8)]))
+            i += 1
+
         elif elem_type == 'hr':
             # Simple spacer for horizontal rules
             story.append(Spacer(1, 12))
-    
+            i += 1
+
+        else:
+            i += 1
+
     return story
 
 
