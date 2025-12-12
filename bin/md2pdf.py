@@ -139,6 +139,12 @@ def parse_frontmatter(content):
             return content[end + 3:].strip()
     return content
 
+def remove_comments(content):
+    content = re.sub(r'<!--.*?-->', '', content, flags=re.DOTALL) # HTML
+    content = re.sub(r'%%.*?%%', '', content, flags=re.DOTALL) # Obsidian
+    content = re.sub(r':::hidden\n.*?\n:::', '', content, flags=re.DOTALL)
+    return content
+
 
 def convert_inline_formatting(text):
     """Convert markdown inline formatting to reportlab XML tags."""
@@ -159,18 +165,19 @@ def convert_inline_formatting(text):
     text = re.sub(r'`(.+?)`', r'<font face="Courier" size="8">\1</font>', text)
     
     # Links: [text](url) - just show the text
-    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'<font color="#8b0000">\1</font>', text)
     
     # Wiki links: [[text]] or [[text|display]]
-    text = re.sub(r'\[\[([^|\]]+)\|([^\]]+)\]\]', r'\2', text)
-    text = re.sub(r'\[\[([^\]]+)\]\]', r'\1', text)
-    
+    text = re.sub(r'\[\[([^|\]]+)\|([^\]]+)\]\]', r'<font color="#8b0000">\2</font>', text)
+    text = re.sub(r'\[\[([^\]]+)\]\]', r'<font color="#8b0000">\1</font>', text) 
+
     return text
 
 
 def parse_markdown(content):
     """Parse markdown content into structured elements."""
     content = parse_frontmatter(content)
+    content = remove_comments(content)
     lines = content.split('\n')
     
     elements = []
@@ -322,7 +329,7 @@ def build_story(elements, styles):
     story = []
     
     for elem_type, content in elements:
-        if elem_type == 'title':
+        if elem_type == 'zz_title':
             story.append(Paragraph(convert_inline_formatting(content), styles['DocTitle']))
             story.append(Spacer(1, 12))
         
