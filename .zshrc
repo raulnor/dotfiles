@@ -61,9 +61,10 @@ services=(
   "com.travis.mindari.monitor"
   "com.travis.mindari.server"
   "homebrew.mxcl.seventeenlands"
-  "site.melvis.dnd.5001"
+  "site.melvis.green.dnd"
   "site.melvis.green.mindari"
-  "site.melvis.green.msiysp.4001"
+  "site.melvis.green.msiysp"
+  "site.melvis.green.wordgames"
 )
 
 function svc() {
