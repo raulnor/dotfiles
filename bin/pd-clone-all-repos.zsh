@@ -248,7 +248,7 @@ pd-git-update "POD-Scripts" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penn
 # pd-git-update "DashboardWeb" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/DashboardWeb"
 # pd-git-update "DevOps" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/DevOps"
 # pd-git-update "ecs-java" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/ecs-java"
-# pd-git-update "esec_custompages" "development" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/esec_custompages"
+pd-git-update "esec_custompages" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/esec_custompages"
 # pd-git-update "framework-java" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/framework-java"
 pd-git-update "Helpfiles" "master" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/Helpfiles"
 # pd-git-update "MinimalClientApp" "main" "penndotvso@vs-ssh.visualstudio.com:v3/penndotvso/SES-Mobile/MinimalClientApp"
