@@ -45,9 +45,9 @@ def create_styles():
         name='DocTitle',
         parent=styles['Title'],
         fontSize=18,
-        spaceAfter=12,
+        spaceAfter=6,
         textColor=colors.HexColor('#2c3e50'),
-        alignment=TA_CENTER
+        alignment=TA_LEFT
     ))
 
     # Section header (## level)
@@ -127,6 +127,16 @@ def create_styles():
         spaceAfter=6,
         spaceBefore=6,
         backColor=colors.HexColor('#f0f0f0'),
+    ))
+
+    # Stat block line (for D&D stat blocks)
+    styles.add(ParagraphStyle(
+        name='StatLine',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        spaceAfter=3,
+        alignment=TA_LEFT
     ))
 
     return styles
@@ -228,19 +238,25 @@ def parse_markdown(content):
             # Don't increment - process this line normally
         
         # Handle tables
-        if '|' in stripped and not stripped.startswith('|--'):
+        if '|' in stripped:
+            # Table separator row (e.g., |---|---|---|)
+            if stripped.startswith('|--') or (in_table and all(re.match(r'^[-:]+$', c.strip()) for c in stripped.split('|') if c.strip())):
+                # Skip separator but keep table state active
+                i += 1
+                continue
+
             if not in_table:
                 in_table = True
                 table_rows = []
-            
+
             # Parse table row
             cells = [c.strip() for c in stripped.split('|')]
             cells = [c for c in cells if c]  # Remove empty cells from edges
-            
-            # Skip separator rows
-            if cells and not all(re.match(r'^[-:]+$', c) for c in cells):
+
+            # Add row to table
+            if cells:
                 table_rows.append(cells)
-            
+
             i += 1
             continue
         elif in_table:
@@ -297,25 +313,34 @@ def parse_markdown(content):
             elements.append(('hr', None))
             i += 1
             continue
-        
+
+        # Stat block line: **LABEL** content (e.g., **AC** 17, **HP** 110)
+        # Match lines that start with **word** followed by space and content
+        stat_match = re.match(r'^\*\*([A-Z][A-Za-z\s]*)\*\*\s+(.+)$', stripped)
+        if stat_match:
+            elements.append(('statline', stripped))
+            i += 1
+            continue
+
         # Regular paragraph
         # Collect continuation lines
         para_lines = [stripped]
         i += 1
         while i < len(lines):
             next_line = lines[i].strip()
-            # Stop at empty lines, headers, lists, quotes, tables
-            if (next_line == '' or 
-                next_line.startswith('#') or 
+            # Stop at empty lines, headers, lists, quotes, tables, stat lines
+            if (next_line == '' or
+                next_line.startswith('#') or
                 next_line.startswith('- ') or
                 next_line.startswith('* ') or
                 next_line.startswith('>') or
                 re.match(r'^\d+\.\s', next_line) or
+                re.match(r'^\*\*([A-Z][A-Za-z\s]*)\*\*\s+', next_line) or
                 '|' in next_line):
                 break
             para_lines.append(next_line)
             i += 1
-        
+
         elements.append(('para', ' '.join(para_lines)))
     
     # Handle any remaining quote
@@ -339,9 +364,8 @@ def build_story(elements, styles, column_width=None):
     while i < len(elements):
         elem_type, content = elements[i]
 
-        if elem_type == 'zz_title':
+        if elem_type == 'title':
             story.append(Paragraph(convert_inline_formatting(content), styles['DocTitle']))
-            story.append(Spacer(1, 12))
             i += 1
 
         elif elem_type in ['h2', 'h3', 'h4']:
@@ -399,6 +423,10 @@ def build_story(elements, styles, column_width=None):
             story.append(Paragraph(convert_inline_formatting(content), styles['ListItem']))
             i += 1
 
+        elif elem_type == 'statline':
+            story.append(Paragraph(convert_inline_formatting(content), styles['StatLine']))
+            i += 1
+
         elif elem_type == 'table':
             # Keep tables together
             table_data = []
@@ -413,16 +441,16 @@ def build_story(elements, styles, column_width=None):
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8b0000')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 8),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
-                ('TOPPADDING', (0, 0), (-1, 0), 6),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
                 ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9f9f9')),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1),
-                 [colors.HexColor('#ffffff'), colors.HexColor('#f5f5f5')]),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#8b0000')),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ]))
             story.append(KeepTogether([table, Spacer(1, 8)]))
             i += 1
