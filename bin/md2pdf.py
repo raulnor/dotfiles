@@ -25,7 +25,7 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.platypus import (
     BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer,
-    Table, TableStyle, KeepTogether
+    Table, TableStyle, KeepTogether, FrameBreak
 )
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
 
@@ -293,9 +293,12 @@ def parse_markdown(content):
             continue
         
         # Headers
-        if stripped.startswith('# ') and title is None:
-            title = stripped[2:].strip()
-            elements.append(('title', title))
+        if stripped.startswith('# '):
+            # Store first H1 as title for metadata
+            if title is None:
+                title = stripped[2:].strip()
+            # Add all H1s as title elements (with column break for subsequent ones)
+            elements.append(('title', stripped[2:].strip()))
             i += 1
             continue
         
@@ -380,11 +383,18 @@ def build_story(elements, styles, column_width=None):
         column_width = COLUMN_WIDTH
     story = []
 
+    first_title = True
     i = 0
     while i < len(elements):
         elem_type, content = elements[i]
 
         if elem_type == 'title':
+            # Add column break before subsequent H1 titles (for side-by-side stat blocks)
+            if not first_title:
+                # Force a frame break to move to next column
+                story.append(FrameBreak())
+            first_title = False
+
             story.append(Paragraph(convert_inline_formatting(content), styles['DocTitle']))
             i += 1
 
@@ -404,8 +414,8 @@ def build_story(elements, styles, column_width=None):
             items_to_keep = 0
             while j < len(elements) and items_to_keep < 3:
                 next_type = elements[j][0]
-                # Stop at next heading
-                if next_type in ['h2', 'h3', 'h4', 'hr']:
+                # Stop at next heading (including H1 titles)
+                if next_type in ['title', 'h2', 'h3', 'h4', 'hr']:
                     break
                 items_to_keep += 1
                 j += 1
