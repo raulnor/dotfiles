@@ -139,6 +139,26 @@ def create_styles():
         alignment=TA_LEFT
     ))
 
+    # Table header cell
+    styles.add(ParagraphStyle(
+        name='TableHeader',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        alignment=TA_CENTER,
+        textColor=colors.whitesmoke,
+        fontName='Helvetica-Bold'
+    ))
+
+    # Table data cell
+    styles.add(ParagraphStyle(
+        name='TableCell',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        alignment=TA_CENTER
+    ))
+
     return styles
 
 
@@ -430,27 +450,59 @@ def build_story(elements, styles, column_width=None):
         elif elem_type == 'table':
             # Keep tables together
             table_data = []
+            for row_idx, row in enumerate(content):
+                # Wrap each cell in a Paragraph to support rich text formatting
+                formatted_row = []
+                for cell in row:
+                    formatted_text = convert_inline_formatting(cell)
+                    # Use appropriate style for header vs data rows
+                    if row_idx == 0:
+                        # Header row - use TableHeader style
+                        cell_para = Paragraph(formatted_text, styles['TableHeader'])
+                    else:
+                        # Data row - use TableCell style
+                        cell_para = Paragraph(formatted_text, styles['TableCell'])
+                    formatted_row.append(cell_para)
+                table_data.append(formatted_row)
+
+            # Calculate column widths based on content
+            num_cols = max(len(row) for row in content) if content else 1
+
+            # Calculate approximate width for each column based on content length
+            col_widths = [0] * num_cols
             for row in content:
-                table_data.append([convert_inline_formatting(cell) for cell in row])
+                for col_idx, cell in enumerate(row):
+                    # Estimate width based on character count (rough approximation)
+                    # Remove markdown formatting for more accurate width estimation
+                    clean_cell = cell
+                    clean_cell = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', clean_cell)  # Links
+                    clean_cell = re.sub(r'\*\*(.+?)\*\*', r'\1', clean_cell)  # Bold
+                    clean_cell = re.sub(r'\*(.+?)\*', r'\1', clean_cell)  # Italic
 
-            # Calculate column widths
-            num_cols = max(len(row) for row in table_data) if table_data else 1
-            col_width = (column_width - 12) / num_cols
+                    # Estimate width: chars * font_size * char_width_factor
+                    estimated_width = len(clean_cell) * 5.5  # Roughly 5.5 points per char for size 9
+                    col_widths[col_idx] = max(col_widths[col_idx], estimated_width)
 
-            table = Table(table_data, colWidths=[col_width] * num_cols)
+            # Add padding to column widths
+            col_widths = [w + 12 for w in col_widths]  # 12 pts padding per column
+
+            # If total width exceeds available space, scale down proportionally
+            total_width = sum(col_widths)
+            available_width = column_width - 12
+            if total_width > available_width:
+                scale_factor = available_width / total_width
+                col_widths = [w * scale_factor for w in col_widths]
+
+            table = Table(table_data, colWidths=col_widths)
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8b0000')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9f9f9')),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#8b0000')),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
                 ('TOPPADDING', (0, 0), (-1, -1), 4),
                 ('LEFTPADDING', (0, 0), (-1, -1), 4),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9f9f9')),
-                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#8b0000')),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ]))
             story.append(KeepTogether([table, Spacer(1, 8)]))
             i += 1
