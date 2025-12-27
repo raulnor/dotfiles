@@ -153,24 +153,28 @@ def convert_inline_formatting(text):
     text = text.replace('&', '&amp;')
     text = text.replace('<', '&lt;')
     text = text.replace('>', '&gt;')
-    
+
+    # Bold + Italic: ***text*** (must be before bold and italic)
+    text = re.sub(r'\*\*\*(.+?)\*\*\*', r'<b><i>\1</i></b>', text)
+    text = re.sub(r'___(.+?)___', r'<b><i>\1</i></b>', text)
+
     # Bold: **text** or __text__
     text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
     text = re.sub(r'__(.+?)__', r'<b>\1</b>', text)
-    
+
     # Italic: *text* or _text_
     text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
     text = re.sub(r'(?<!\w)_(.+?)_(?!\w)', r'<i>\1</i>', text)
-    
+
     # Inline code: `text`
     text = re.sub(r'`(.+?)`', r'<font face="Courier" size="8">\1</font>', text)
-    
+
     # Links: [text](url) - just show the text
     text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'<font color="#8b0000">\1</font>', text)
-    
+
     # Wiki links: [[text]] or [[text|display]]
     text = re.sub(r'\[\[([^|\]]+)\|([^\]]+)\]\]', r'<font color="#8b0000">\2</font>', text)
-    text = re.sub(r'\[\[([^\]]+)\]\]', r'<font color="#8b0000">\1</font>', text) 
+    text = re.sub(r'\[\[([^\]]+)\]\]', r'<font color="#8b0000">\1</font>', text)
 
     return text
 
