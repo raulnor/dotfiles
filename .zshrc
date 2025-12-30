@@ -65,6 +65,7 @@ services=(
   "site.melvis.green.mindari"
   "site.melvis.green.msiysp"
   "site.melvis.green.wordgames"
+  "site.melvis.tempo"
 )
 
 function svc() {
