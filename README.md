@@ -7,6 +7,7 @@ If you're grabbing this to run something, you'll to want the following above and
 - [fzf](https://github.com/junegunn/fzf)
 - [ImageMagick](https://github.com/ImageMagick/ImageMagick)
 - [ripgrep](https://github.com/BurntSushi/ripgrep)
+- [uv](https://docs.astral.sh/uv/)
 
 ## Installation
 - `make` or `make scripts` - Installs all scripts from `src/bin/` to `$(HOME)/bin` with executable permissions and removes file extensions
