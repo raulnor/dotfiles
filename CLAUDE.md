@@ -1,2 +1,0 @@
-# CLAUDE.md
-This file provides guidance to Claude Code when working on my code. Look for and read README.md for the project you are in. Instructions there supercede direction here. If README.md appears to be out of date, suggest updates along with other code.
