@@ -13,6 +13,8 @@ PATH=${HOME}/bin:$PATH # Scripts
 PATH=${HOME}/local/bin:$PATH # Small compiled programs
 export ANDROID_HOME=${HOME}/Library/Android/sdk/
 eval "$(~/.local/bin/mise activate)" # Mise
+fpath=(~/.zfunc $fpath)
+autoload -Uz compinit && compinit
 
 function code { open -a "Visual Studio Code" $argv }
 function fork { open -a "Fork" $argv }
