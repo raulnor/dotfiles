@@ -1,4 +1,4 @@
-# Junk Drawer
+#  dotfiles - Junk Drawer
 This is a collection of my miscellaneous scripts and customizations.
 
 ## Running Scripts
