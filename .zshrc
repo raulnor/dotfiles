@@ -17,7 +17,6 @@ fpath=(~/.zfunc $fpath)
 autoload -Uz compinit && compinit
 
 function code { open -a "Visual Studio Code" $argv }
-function fork { open -a "Fork" $argv }
 function edge { open -a "Microsoft Edge" $argv }
 function safari { open -a "Safari" $argv }
 function xc { open -a "Xcode" $argv }
