@@ -1,5 +1,12 @@
 all: scripts
 
+config: .config/zsh/*.*
+	@mkdir -p $(HOME)/.config/zsh
+	@for file in .config/zsh/*.*; do \
+		cp "$$file" "$(HOME)/.config/zsh/$${name%.*}"; \
+	done
+	@echo "Config installed to $(HOME)/.config/zsh"
+
 scripts: bin/*.*
 	@mkdir -p $(HOME)/bin
 	@for file in bin/*.*; do \
@@ -9,4 +16,4 @@ scripts: bin/*.*
 	done
 	@echo "Scripts installed to $(HOME)/bin"
 
-.PHONY: all scripts
+.PHONY: all config scripts
