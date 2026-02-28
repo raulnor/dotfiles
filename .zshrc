@@ -56,22 +56,6 @@ function pbsort {
     pbpaste | sort "$@" | pbcopy
 }
 
-function rcd() {
-    local repo=$(gh repo list --source --no-archived --visibility=public --limit 1000 --json nameWithOwner --jq '.[].nameWithOwner' | fzf --preview "git -C ${CODE}/{} log --color=always --format='%C(yellow)%h%C(reset) - %C(cyan)%ar%C(reset) - %s %C(dim)- %an%C(reset)' -n 20")
-    
-    if [[ -n "$repo" ]]; then
-        cd "${CODE}/${repo}"
-    fi
-}
-
-function pdcd() {
-    local repo=$(find ${CODE}/penndotvso -maxdepth 1 -type d -not -path ${CODE}/penndotvso | sed "s|${CODE}/penndotvso/||" | sort | fzf --preview "git -C ${CODE}/penndotvso/{} log --color=always --graph --format='%C(auto)%h%d %C(cyan)%ar%C(reset) %s %C(dim)- %an%C(reset)' -n 20")
-    
-    if [[ -n "$repo" ]]; then
-        cd "${CODE}/penndotvso/${repo}"
-    fi
-}
-
 services=(
   "com.cloudflare.cloudflared"
   "com.tl.sqlitebackup"
@@ -126,11 +110,11 @@ function bigfiles {
 }
 
 alias lg='lazygit'
-alias pcd='cd $(list-projects | fzf)'
 alias dictwords='cat /usr/share/dict/words | fzf'
 alias wordle='cat ${HOME}/share/wordle | fzf'
 alias octordle='cat ${HOME}/share/octordle | fzf'
 alias skiping='ping skitheeast.asuscomm.com'
 
 [ -f ~/.config/zsh/fzf.zsh ] && source ~/.config/zsh/fzf.zsh
+[ -f ~/.config/zsh/pcd.zsh ] && source ~/.config/zsh/pcd.zsh
 [ -f ~/.config/zsh/zoxide.zsh ] && source ~/.config/zsh/zoxide.zsh
