@@ -109,6 +109,24 @@ function bigfiles {
     fd -t f -E "*.png" -E "*.xcodeproj" | xargs wc -l | sort
 }
 
+function ytmp3() {
+    local dir="${HOME}/Documents/Music/yt-dlp"
+
+    if [[ -z "$1" ]]; then
+        echo "Usage: ytmp3 <video_id>"
+        return 1
+    fi
+    if [[ ! -d "$dir" ]]; then
+        read "reply?Create ${dir}? [y/N] "
+        [[ "$reply" =~ ^[Yy]$ ]] || return 2
+        mkdir -p "$dir"
+    fi
+
+
+    yt-dlp -x --audio-format mp3 -o "${dir}/%(title)s.%(ext)s" "https://www.youtube.com/watch?v=$1"
+}
+
+
 alias lg='lazygit'
 alias dictwords='cat /usr/share/dict/words | fzf'
 alias wordle='cat ${HOME}/share/wordle | fzf'
@@ -118,3 +136,4 @@ alias skiping='ping skitheeast.asuscomm.com'
 [ -f ~/.config/zsh/fzf.zsh ] && source ~/.config/zsh/fzf.zsh
 [ -f ~/.config/zsh/pcd.zsh ] && source ~/.config/zsh/pcd.zsh
 [ -f ~/.config/zsh/zoxide.zsh ] && source ~/.config/zsh/zoxide.zsh
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
