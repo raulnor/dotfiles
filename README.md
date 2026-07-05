@@ -14,7 +14,6 @@ If you're grabbing this to run something, you'll to want the following above and
 
 ## Directory Layout
 - `bin/` - Current collection of executable scripts
-- `old/` - Legacy scripts and utilities (archived)
 - `Makefile` - Simple build system for script installation
 
 ## Working with Scripts
