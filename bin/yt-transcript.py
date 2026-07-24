@@ -60,6 +60,7 @@ def fetch_transcript_if_needed(url_or_id):
         if text.strip():
             cache.mkdir(parents=True, exist_ok=True)
             tmp = f.with_suffix(".tmp"); tmp.write_text(text); tmp.replace(f)
+        return text
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
