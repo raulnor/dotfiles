@@ -1,19 +1,40 @@
-all: scripts
+.DEFAULT_GOAL := help
 
-config: .config/zsh/*.*
-	@mkdir -p $(HOME)/.config/zsh
-	@for file in .config/zsh/*.*; do \
-		cp "$$file" "$(HOME)/.config/zsh/$${name%.*}"; \
-	done
-	@echo "Config installed to $(HOME)/.config/zsh"
+help:
+	@echo "Run \`make install\` to install configs and scripts."
 
-scripts: bin/*.*
-	@mkdir -p $(HOME)/bin
-	@for file in bin/*.*; do \
-		chmod +x "$$file"; \
-		name=$$(basename "$$file"); \
-		cp "$$file" "$(HOME)/bin/$${name%.*}"; \
-	done
-	@echo "Scripts installed to $(HOME)/bin"
+SYNC := rsync -rc --delete --out-format='  %o %n'
 
-.PHONY: all config scripts
+install: config scripts
+
+config: nvim zsh
+
+nvim: .config/nvim/*.*
+	@mkdir -p $(HOME)/.config/nvim/
+	@$(SYNC) .config/nvim/ $(HOME)/.config/nvim/
+
+zsh: .config/zsh/*.*
+	@mkdir -p $(HOME)/.config/zsh/
+	@$(SYNC) .config/zsh/ $(HOME)/.config/zsh/
+
+BIN := $(HOME)/bin
+SRC := $(wildcard bin/*.*)
+DST := $(addprefix $(BIN)/,$(basename $(notdir $(SRC))))
+
+scripts: $(DST)
+
+$(DST): | $(BIN)
+
+$(BIN):
+	@mkdir -p $@
+
+$(BIN)/%: bin/%.py
+	@install -v -m 755 $< $@
+$(BIN)/%: bin/%.sh
+	@install -v -m 755 $< $@
+$(BIN)/%: bin/%.zsh
+	@install -v -m 755 $< $@
+$(BIN)/%: bin/%.exs
+	@install -v -m 755 $< $@
+
+.PHONY: help install config nvim zsh scripts
