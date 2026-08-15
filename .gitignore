@@ -18,3 +18,7 @@ Brewfile.lock.json
 
 # Job output
 /var
+
+# yt-mp3 (et al) use Java / Clojure
+.clj-kondo
+.lsp

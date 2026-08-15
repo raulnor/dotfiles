@@ -6,6 +6,7 @@ if [[ -z "$1" ]]; then
     echo "Usage: $(basename $0) <video_id>"
     return 1
 fi
+video_id="$1"; shift
 
 
 if [[ ! -d "$YT_MP3_DIR" ]]; then
@@ -19,4 +20,7 @@ yt-dlp -x --audio-format mp3 \
     --embed-metadata --embed-thumbnail \
     --parse-metadata "%(title)s:%(artist)s - %(track)s" \
     -o "${YT_MP3_DIR}/%(title)s.%(ext)s" \
-    "https://www.youtube.com/watch?v=$1"
+    ${YT_MP3_OPTS} "$@" \
+    "https://www.youtube.com/watch?v=$video_id"
+
+
