@@ -118,5 +118,4 @@ alias skiping='ping skitheeast.asuscomm.com'
 
 [ -f ~/.config/zsh/fzf.zsh ] && source ~/.config/zsh/fzf.zsh
 [ -f ~/.config/zsh/pcd.zsh ] && source ~/.config/zsh/pcd.zsh
-[ -f ~/.config/zsh/zoxide.zsh ] && source ~/.config/zsh/zoxide.zsh
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
