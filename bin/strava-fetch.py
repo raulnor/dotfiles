@@ -110,31 +110,6 @@ def parse_cookie_header(header: str) -> dict:
     return out
 
 
-def prompt_for_cookie() -> dict:
-    if not sys.stdin.isatty():
-        # Piped in, e.g. `pbpaste | ./strava-fetch.py --login 123`.
-        raw = sys.stdin.read()
-    else:
-        # Importing readline puts the tty in raw mode, which lifts the 1024-byte
-        # canonical-input limit. Without it the paste is silently truncated.
-        try:
-            import readline  # noqa: F401
-        except ImportError:
-            pass
-        print(INSTRUCTIONS, file=sys.stderr)
-        try:
-            raw = input("cookie> ")
-        except (EOFError, KeyboardInterrupt):
-            sys.exit("\nAborted.")
-
-    cookies = parse_cookie_header(clean_paste(raw))
-    missing = ESSENTIAL - cookies.keys()
-    if missing:
-        sys.exit(f"That paste is missing: {', '.join(sorted(missing))}. "
-                 "Make sure you copied the entire value.")
-    return cookies
-
-
 def make_cookie(name: str, value: str) -> Cookie:
     return Cookie(
         version=0, name=name, value=value,
@@ -151,26 +126,31 @@ def make_session(force_login: bool = False) -> requests.Session:
     jar = MozillaCookieJar(str(path))
     if path.exists() and not force_login:
         jar.load(ignore_discard=True, ignore_expires=True)
-
-    if force_login or not any(c.name in ESSENTIAL for c in jar):
-        for name, value in prompt_for_cookie().items():
-            jar.set_cookie(make_cookie(name, value))
-
     s = requests.Session()
     s.cookies = jar
     s.headers.update(HEADERS)
     return s
 
 
-def save(session: requests.Session) -> None:
+def save_session(session: requests.Session) -> None:
     path = jar_path()
     session.cookies.save(ignore_discard=True, ignore_expires=True)
     path.chmod(0o600)
 
+def save_activity(activity_id: str, body: str) -> None:
+    path = jar_path()
+    session.cookies.save(ignore_discard=True, ignore_expires=True)
+    path.chmod(0o600)
 
-def fetch(session: requests.Session, activity_id: str) -> str:
-    url = f"https://www.strava.com/activities/{activity_id}"
-    r = session.get(url, timeout=30)
+# TODO: Replace with regex
+def get_activity_id(url_or_id):
+    return url_or_id.rstrip("/").rsplit("/", 1)[-1]
+
+def fetch_activity(url_or_id):
+    session = make_session()
+    activity_id = get_activity_id(url_or_id)
+    activity_url = f"https://www.strava.com/activities/{activity_id}"
+    r = session.get(activity_url, timeout=30)
     r.raise_for_status()
 
     # Strava serves the login page with a 200, so a dead session looks like
@@ -178,14 +158,28 @@ def fetch(session: requests.Session, activity_id: str) -> str:
     if "/login" in r.url or "session[email]" in r.text:
         sys.exit("Session expired. Re-run with --login to paste a fresh cookie.")
 
-    save(session)
+    save_session(session)
+
     return r.text
 
+def fetch_activity_if_needed(url_or_id):
+    activity_id = get_activity_id(url_or_id)
+    d = local_dir()
+    f = d / f"{activity_id}.txt"
+    if f.exists() and f.stat().st_size > 0:
+        print(f"strava-fetch: cached {f}", file=sys.stderr)
+        return f.read_text()
+    else:
+        text = fetch_activity(activity_id)
+        if text.strip():
+            d.mkdir(parents=True, exist_ok=True)
+            tmp = f.with_suffix(".tmp"); tmp.write_text(text); tmp.replace(f)
+        return text
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--login"]
-    force = "--login" in sys.argv[1:]
+    args = sys.argv[1:]
     if not args:
-        sys.exit("Usage: strava-fetch.py [--login] <activity_id_or_url>")
-    ident = args[0].rstrip("/").rsplit("/", 1)[-1]
-    print(fetch(make_session(force), ident))
+        sys.exit("Usage: strava-fetch.py <activity_id_or_url>")
+    for arg in args:
+        activity = fetch_activity_if_needed(arg)
+        print(activity)
